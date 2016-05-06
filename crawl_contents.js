@@ -2,39 +2,23 @@ var casper = require("casper").create({});
 
 var dst = casper.cli.options["dst"];
 var toon_id = casper.cli.options["id"];
-var no = casper.cli.options["no"];
+var lastno = casper.cli.options["no"];
+var no;
+casper.start();
+for (no=1; no<=lastno;no++){
+    var nox = no;
+    var uri ='http://comic.naver.com/webtoon/detail.nhn?titleId=' + toon_id + '&no=' + nox;
+    (function(m){
+        casper.thenOpen(uri, function() {
+            var i;
+            for(i=0;;i++){
+                var id = '#content_image_' + i;
+                if( casper.exists(id) == false ) break;
+                this.captureSelector(m + '_' + i + '.png', id);
+        }
+    });
+    console.log('No '+ m + '. has rendered' );
+})(nox);
+}
 
-var uri = 'http://comic.naver.com/webtoon/detail.nhn?titleId=' + toon_id + '&no=' + no;
-
-casper.start(uri, function() {
-  var i;
-  for(i=0;;i++){
-    var id = '#content_image_' + i;
-
-    if( casper.exists(id) == false ) break;
-    this.captureSelector(dst + i + '.png', id);
-  }
-
-  var result = casper.evaluate(function(){
-    var get_text = function(selector){
-      return document.querySelector(selector).innerText;
-	};
-	
-    return {
-      title : get_text('#content > div.section_spot > div.tit_area > div.view > h3'),
-      rating : get_text('#topPointTotalNumber > strong')
-      }
-  });
-
-  if(result == null){
-    result = {};
-    result['code'] = 0;
-  } else{
-    result['count'] = i;
-    result['code'] = 1;
-  }
-
-  console.log( JSON.stringify(result) );
-});
-
-casper.run();	
+casper.run();
