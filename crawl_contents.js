@@ -2,14 +2,25 @@ var casper = require("casper").create({});
 
 var dst = casper.cli.options["dst"];
 var toon_id = casper.cli.options["id"];
-var lastno = casper.cli.options["no"];
+var last_no = casper.cli.options["no"];
 var no;
 
-casper.start();
+var fs = require('fs');
+var path = fs.workingDirectory + '/' + dst;
 
-for (no=1; no<=lastno;no++){
-    var nox = no;
-    var uri ='http://comic.naver.com/webtoon/detail.nhn?titleId=' + toon_id + '&no=' + nox;
+
+if(fs.makeDirectory(path)){
+	console.log('"'+path+'" was created.');
+	casper.start();
+}
+
+else{
+	console.log('"'+path+'" is NOT created.');
+}
+
+for (no=1; no<=last_no;no++){
+    var temp_no = no;
+    var uri ='http://comic.naver.com/webtoon/detail.nhn?titleId=' + toon_id + '&no=' + temp_no;
 
     (function(m){
         casper.thenOpen(uri, function() {
@@ -27,13 +38,13 @@ for (no=1; no<=lastno;no++){
 				var pad2 = "0000"
 				var ans2 = pad2.substring(0, pad2.length - str2.length) + str2
                 
-				this.captureSelector(ans1 + '_' + ans2 + '.png', id);
+				this.captureSelector(path + '/' + ans1 + '_' + ans2 + '.png', id);
         	}
 
 			console.log('No '+ m + '. has rendered' );
     });
 
-})(nox);
+})(temp_no);
 }
 
 casper.run();
